@@ -1,3 +1,3 @@
 module github.com/lylwx/xgo
 
-go 1.14
+go 1.12
