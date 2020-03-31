@@ -4,7 +4,7 @@
 // Released under the MIT license.
 
 // Wrapper around the GCO cross compiler docker container.
-package main // import "src.techknowlogick.com/xgo"
+package main // import "github.com/lylwx/xgo"
 
 import (
 	"bytes"
@@ -315,11 +315,18 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 	re := regexp.MustCompile("([A-Z]):")
 	folder_w := filepath.ToSlash(re.ReplaceAllString(folder, "/$1"))
 	depsCache_w := filepath.ToSlash(re.ReplaceAllString(depsCache, "/$1"))
+	// Add xgo-build-cache
+	osTarget := strings.ReplaceAll(*targets, "/", "-")
+	fmt.Printf(fmt.Sprintf("Use GOCACHE=/tmp/xgo-build-cache/%s\n", osTarget))
+	fmt.Printf("Use GO_MODULE_CACHE=/tmp/xgo-module-cache\n")
 
 	args := []string{
 		"run", "--rm",
 		"-v", folder_w + ":/build",
 		"-v", depsCache_w + ":/deps-cache:ro",
+		"-v", fmt.Sprintf("/tmp/xgo-build-cache/%s:/xgo-build-cache", osTarget),
+		"-v", "/tmp/xgo-module-cache:/go/pkg/mod",
+		"-e", "GOCACHE=/xgo-build-cache",
 		"-e", "REPO_REMOTE=" + config.Remote,
 		"-e", "REPO_BRANCH=" + config.Branch,
 		"-e", "PACK=" + config.Package,
